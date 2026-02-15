@@ -8,12 +8,13 @@ import ColorBox from './components/ColorBox.jsx'
 import NotesManager from './components/NotesManager.jsx'
 import TodoList from './components/TodoList.jsx'
 import Events from './workshop/Events.jsx'
-
+import { routes } from './routes.jsx'
+import { RouterProvider } from 'react-router-dom'
 
 function App() {
   return (
     <div className="App">
-      <Events />
+      <RouterProvider router={routes} />
     </div>
   )
 }

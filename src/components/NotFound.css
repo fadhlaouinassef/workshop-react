@@ -1,0 +1,25 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.not-found-image {
+  max-width: 500px;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-container h1 {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.not-found-container .lead {
+  color: #6c757d;
+}

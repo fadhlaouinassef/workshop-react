@@ -1,74 +1,52 @@
-import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
+import React from 'react'
+import { Button, Card } from 'react-bootstrap'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
-function Event(props) {
-  const isSoldOut = props.tickets === 0;
+export default function Event({ event, showBuyAlert }) {
 
-  const handleBookEvent = () => {
-    props.buy(props.index);
-  };
+  const [eventInfo, setEventInfo] = useState(event)
 
-  const handleToggleLike = () => {
-    props.toggleLike(props.index);
-  };
+  const handleBuy = () => {
+    setEventInfo((prevEventInfo) => {
+      return {
+        ...prevEventInfo,
+        nbParticipants: prevEventInfo.nbParticipants + 1,
+        nbTickets: prevEventInfo.nbTickets - 1
+      }
+    });
+    showBuyAlert();
+  }
+
+  const handleLike = () => {
+    setEventInfo((prevEventInfo) => {
+      return {
+        ...prevEventInfo,
+        like: !prevEventInfo.like
+      }
+    });
+  }
 
   return (
-    <Col md={4} className="mb-4">
-      <Card>
-        <div style={{ position: 'relative' }}>
-          <Card.Img variant="top" src={`/images/${props.img}`} alt={props.img} />
-          {isSoldOut && (
-            <img
-              src="/images/sold_out.png"
-              alt="Sold Out"
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '150px',
-                opacity: 0.9
-              }}
-            />
-          )}
-        </div>
+    <Card style={{ width: '18rem' }}>
+      <Card.Img variant="top" src={`/images/${eventInfo.nbTickets === 0 ? 'sold_out.png' : eventInfo.img}`} />
+      <Card.Body>
+        <Card.Title>
+          <Link
+            to={`/events/${encodeURIComponent(eventInfo.name)}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            {eventInfo.name}
+          </Link>
+        </Card.Title>
+        <Card.Text> Price : {eventInfo.price}  </Card.Text>
+        <Card.Text> Number of tickets : {eventInfo.nbTickets}  </Card.Text>
+        <Card.Text> Number of participants :  {eventInfo.nbParticipants} </Card.Text>
 
-        <Card.Body>
-          <Card.Title>{props.name}</Card.Title>
-
-          <Card.Text>
-            <strong>Price:</strong> {props.price} DT
-          </Card.Text>
-
-          <Card.Text>
-            <strong>Number of tickets:</strong> {props.tickets}
-          </Card.Text>
-
-          <Card.Text>
-            <strong>Number of participants:</strong> {props.participants}
-          </Card.Text>
-
-          <div className="d-flex gap-2">
-            <Button
-              variant="primary"
-              onClick={handleBookEvent}
-              disabled={isSoldOut}
-            >
-              Book an event
-            </Button>
-
-            <Button
-              variant={props.like ? "danger" : "outline-danger"}
-              onClick={handleToggleLike}
-            >
-              {props.like ? "Dislike" : "Like"}
-            </Button>
-          </div>
-        </Card.Body>
-      </Card>
-    </Col>
-  );
+        <Button onClick={handleBuy} disabled={eventInfo.nbTickets === 0 ? true : false} variant="primary">Book an event</Button>
+        <Button onClick={handleLike}>{eventInfo.like ? "Dislike" : "Like"}</Button>
+      </Card.Body>
+    </Card>
+  )
 }
 
-export default Event;
