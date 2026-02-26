@@ -1,11 +1,13 @@
 import React from 'react'
 import { Button, Card } from 'react-bootstrap'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { deleteEvent } from '../service/api'
 
-export default function Event({ event, showBuyAlert }) {
+export default function Event({ event, showBuyAlert, onDelete }) {
 
   const [eventInfo, setEventInfo] = useState(event)
+  const navigate = useNavigate()
 
   const handleBuy = () => {
     setEventInfo((prevEventInfo) => {
@@ -27,8 +29,20 @@ export default function Event({ event, showBuyAlert }) {
     });
   }
 
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete "${eventInfo.name}"?`)) {
+      try {
+        await deleteEvent(eventInfo.id)
+        if (onDelete) onDelete(eventInfo.id)
+      } catch (err) {
+        console.error('Failed to delete event:', err)
+        alert('Failed to delete event.')
+      }
+    }
+  }
+
   return (
-    <Card style={{ width: '18rem' }}>
+    <Card style={{ width: '18rem', marginBottom: '1rem' }}>
       <Card.Img variant="top" src={`/images/${eventInfo.nbTickets === 0 ? 'sold_out.png' : eventInfo.img}`} />
       <Card.Body>
         <Card.Title>
@@ -43,10 +57,25 @@ export default function Event({ event, showBuyAlert }) {
         <Card.Text> Number of tickets : {eventInfo.nbTickets}  </Card.Text>
         <Card.Text> Number of participants :  {eventInfo.nbParticipants} </Card.Text>
 
-        <Button onClick={handleBuy} disabled={eventInfo.nbTickets === 0 ? true : false} variant="primary">Book an event</Button>
-        <Button onClick={handleLike}>{eventInfo.like ? "Dislike" : "Like"}</Button>
+        <div className="d-flex flex-wrap gap-1">
+          <Button onClick={handleBuy} disabled={eventInfo.nbTickets === 0} variant="primary" size="sm">Book</Button>
+          <Button onClick={handleLike} variant="outline-secondary" size="sm">{eventInfo.like ? "Dislike" : "Like"}</Button>
+          <Button
+            variant="warning"
+            size="sm"
+            onClick={() => navigate(`/events/update/${eventInfo.id}`)}
+          >
+            Update Event
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={handleDelete}
+          >
+            Delete Event
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   )
 }
-

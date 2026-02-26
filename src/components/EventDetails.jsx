@@ -1,24 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Row, Col, Badge } from 'react-bootstrap';
-import eventsJson from '../data/events.json';
+import { Card, Button, Row, Col, Badge, Spinner, Alert } from 'react-bootstrap';
+import { getallEvents } from '../service/api';
 import './EventDetails.css';
 
 export default function EventDetails() {
     const { eventName } = useParams();
     const navigate = useNavigate();
+    const [event, setEvent] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
-    // Find the event by name (decode URI component to handle special characters)
-    const event = eventsJson.find(
-        e => e.name.toLowerCase() === decodeURIComponent(eventName).toLowerCase()
-    );
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const response = await getallEvents();
+                const allEvents = response.data;
+                const found = allEvents.find(
+                    e => e.name.toLowerCase() === decodeURIComponent(eventName).toLowerCase()
+                );
+                if (found) {
+                    // Fetch by ID to get single event
+                    const detailResponse = await getallEvents(found.id);
+                    setEvent(detailResponse.data);
+                } else {
+                    setNotFound(true);
+                }
+            } catch (err) {
+                console.error(err);
+                setNotFound(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchEvent();
+    }, [eventName]);
+
+    if (loading) {
+        return (
+            <div className="text-center mt-5">
+                <Spinner animation="border" role="status" />
+                <p>Loading event...</p>
+            </div>
+        );
+    }
 
     // If event not found, show error message
-    if (!event) {
+    if (notFound || !event) {
         return (
             <div style={{ textAlign: 'center', marginTop: '50px', padding: '20px' }}>
-                <h2>Event not found</h2>
-                <p>The event you are looking for does not exist.</p>
+                <Alert variant="danger">
+                    <h4>Event does not exist</h4>
+                </Alert>
                 <Button variant="primary" onClick={() => navigate('/events')}>
                     Back to Events
                 </Button>
